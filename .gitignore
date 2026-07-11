@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+venv/
+env/
+.venv/
+
+# Environment secrets
+.env
+
+# SQLite database (each clone generates its own)
+instance/*.db
+instance/*.sqlite3
+
+# Flask-Migrate
+migrations/versions/__pycache__/
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

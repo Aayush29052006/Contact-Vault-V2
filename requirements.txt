@@ -1,0 +1,23 @@
+# Web framework
+Flask==3.0.3
+
+# Database & ORM
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.7
+
+# Auth
+Flask-Login==0.6.3
+Authlib==1.3.1
+
+# Forms & CSRF protection
+Flask-WTF==1.2.1
+
+# Config
+python-dotenv==1.0.1
+
+# Testing
+pytest==8.2.2
+pytest-flask==1.3.0
+
+# Production server (used later when we deploy)
+gunicorn==22.0.0
