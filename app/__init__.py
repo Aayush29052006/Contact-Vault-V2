@@ -21,6 +21,10 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
 
+    # Models must be imported somewhere before Alembic's autogenerate
+    # runs, or it won't see them and will produce an empty migration.
+    from app import models  # noqa: F401
+
     # Blueprints are registered here as each one gets built:
     # from app.auth.routes import auth_bp
     # from app.contacts.routes import contacts_bp
