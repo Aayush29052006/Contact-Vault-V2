@@ -25,3 +25,8 @@ def db(app):
 @pytest.fixture
 def session(db):
     return db.session
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()

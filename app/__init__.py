@@ -2,7 +2,7 @@ from flask import Flask
 from dotenv import load_dotenv
 
 from app.config import Config
-from app.extensions import db, migrate, login_manager
+from app.extensions import db, migrate, login_manager, oauth
 
 load_dotenv()
 
@@ -20,15 +20,24 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    oauth.init_app(app)
+
+    oauth.register(
+        name="google",
+        client_id=app.config["GOOGLE_CLIENT_ID"],
+        client_secret=app.config["GOOGLE_CLIENT_SECRET"],
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid email profile"},
+    )
 
     # Models must be imported somewhere before Alembic's autogenerate
     # runs, or it won't see them and will produce an empty migration.
     from app import models  # noqa: F401
 
-    # Blueprints are registered here as each one gets built:
-    # from app.auth.routes import auth_bp
+    from app.auth.routes import auth_bp
+    app.register_blueprint(auth_bp)
+
     # from app.contacts.routes import contacts_bp
-    # app.register_blueprint(auth_bp)
     # app.register_blueprint(contacts_bp)
 
     return app

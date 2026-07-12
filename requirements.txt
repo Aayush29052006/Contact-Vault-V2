@@ -8,6 +8,7 @@ Flask-Migrate==4.0.7
 # Auth
 Flask-Login==0.6.3
 Authlib==1.3.1
+requests>=2.31.0
 
 # Forms & CSRF protection
 Flask-WTF==1.2.1
