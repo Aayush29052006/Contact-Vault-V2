@@ -21,9 +21,9 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
-    # `contacts` relationship gets added here once the Contact model
-    # exists (next step) - SQLAlchemy needs both sides defined to
-    # resolve a relationship.
+    contacts = db.relationship(
+        "Contact", back_populates="owner", cascade="all, delete-orphan", lazy="dynamic"
+    )
 
     def __repr__(self):
         return f"<User {self.email}>"
