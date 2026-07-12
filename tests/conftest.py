@@ -30,3 +30,26 @@ def session(db):
 @pytest.fixture
 def client(app):
     return app.test_client()
+
+
+def login_via_google(client, google_id="google-1", email="user@example.com", name="Test User"):
+    """Logs a client in by mocking the OAuth callback, the same way
+    test_auth_routes.py does - reused here so other test files don't
+    need real Google credentials or a browser to test logged-in routes."""
+    from unittest.mock import patch
+
+    fake_userinfo = {"sub": google_id, "email": email, "name": name}
+    with patch("app.auth.routes.oauth") as mock_oauth:
+        mock_oauth.google.authorize_access_token.return_value = {"userinfo": fake_userinfo}
+        client.get("/auth/login/google/callback")
+
+
+@pytest.fixture
+def logged_in_client(client):
+    """A test client that's already logged in as one user, plus that
+    user object for making assertions."""
+    from app.models.user import User
+
+    login_via_google(client)
+    user = User.query.filter_by(google_id="google-1").first()
+    return client, user

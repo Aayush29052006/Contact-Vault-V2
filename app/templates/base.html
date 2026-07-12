@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}ContactVault{% endblock %}</title>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('contacts.index') if current_user.is_authenticated else url_for('auth.login') }}">ContactVault</a>
+        {% if current_user.is_authenticated %}
+            &nbsp;|&nbsp;{{ current_user.name }}&nbsp;|&nbsp;
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        {% endif %}
+    </nav>
+    <hr>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

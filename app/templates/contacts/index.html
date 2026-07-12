@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Contacts - ContactVault{% endblock %}
+{% block content %}
+    <h1>Your Contacts</h1>
+
+    <form method="get" action="{{ url_for('contacts.index') }}">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search by name or email">
+        <button type="submit">Search</button>
+        {% if query %}<a href="{{ url_for('contacts.index') }}">Clear</a>{% endif %}
+    </form>
+
+    <p>
+        <a href="{{ url_for('contacts.add') }}">Add contact</a> |
+        <a href="{{ url_for('contacts.bulk_import') }}">Bulk import</a> |
+        <a href="{{ url_for('contacts.export', fmt='csv') }}">Export CSV</a> |
+        <a href="{{ url_for('contacts.export', fmt='json') }}">Export JSON</a>
+    </p>
+
+    <form method="post" action="{{ url_for('contacts.undo') }}">
+        <button type="submit">Undo last action</button>
+    </form>
+
+    {% if contacts %}
+        <table>
+            <thead>
+                <tr><th>Name</th><th>Email</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+            {% for contact in contacts %}
+                <tr>
+                    <td>{{ contact.name }}</td>
+                    <td>{{ contact.email }}</td>
+                    <td>
+                        <a href="{{ url_for('contacts.edit', contact_id=contact.id) }}">Edit</a>
+                        <form method="post" action="{{ url_for('contacts.delete', contact_id=contact.id) }}" style="display:inline">
+                            <button type="submit" onclick="return confirm('Delete this contact?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No contacts {% if query %}matching &quot;{{ query }}&quot; {% endif %}yet.</p>
+    {% endif %}
+{% endblock %}

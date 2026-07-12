@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for
+from flask import Blueprint, redirect, render_template, url_for
 from flask_login import login_user, logout_user, login_required
 
 from app.extensions import db, login_manager, oauth
@@ -45,13 +45,11 @@ def google_callback():
         db.session.commit()
 
     login_user(user)
-    # TODO: redirect to contacts.index once that blueprint exists (next step)
-    return f"Logged in as {user.name} ({user.email})"
+    return redirect(url_for("contacts.index"))
 
 
 @auth_bp.route("/logout")
 @login_required
 def logout():
     logout_user()
-    # TODO: redirect to auth.login once base templates are wired up
-    return "Logged out"
+    return redirect(url_for("auth.login"))

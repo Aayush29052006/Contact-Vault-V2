@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Bulk Import - ContactVault{% endblock %}
+{% block content %}
+    <h1>Bulk Import</h1>
+    <p>Paste one contact per line, formatted as: <code>Name,Email</code></p>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        {{ form.data(rows=10, cols=50) }}
+        {% for error in form.data.errors %}<br><span class="error">{{ error }}</span>{% endfor %}
+        <br><br>
+        {{ form.submit() }}
+    </form>
+    <a href="{{ url_for('contacts.index') }}">Cancel</a>
+{% endblock %}

@@ -28,7 +28,8 @@ class TestAuthRoutes:
             mock_oauth.google.authorize_access_token.return_value = {"userinfo": fake_userinfo}
             response = client.get("/auth/login/google/callback")
 
-        assert response.status_code == 200
+        assert response.status_code == 302
+        assert response.location == "/"
         user = User.query.filter_by(google_id="google-999").first()
         assert user is not None
         assert user.email == "new@example.com"
@@ -58,5 +59,5 @@ class TestAuthRoutes:
             client.get("/auth/login/google/callback")
 
         response = client.get("/auth/logout")
-        assert response.status_code == 200
-        assert b"Logged out" in response.data
+        assert response.status_code == 302
+        assert "/auth/login" in response.location

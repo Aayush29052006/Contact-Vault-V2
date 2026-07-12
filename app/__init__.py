@@ -37,7 +37,7 @@ def create_app(config_class=Config):
     from app.auth.routes import auth_bp
     app.register_blueprint(auth_bp)
 
-    # from app.contacts.routes import contacts_bp
-    # app.register_blueprint(contacts_bp)
+    from app.contacts.routes import contacts_bp
+    app.register_blueprint(contacts_bp)
 
     return app
