@@ -1,7 +1,7 @@
-# ContactVault v2.0 (Web)
+# Contact Vault v2.0 (Web)
 
 A multi-user contact manager built with Flask — the web counterpart to
-[ContactVault v1.0.0](https://github.com/) (desktop, CustomTkinter + JSON).
+[Contact Vault v1.0.0](https://github.com/) (desktop, CustomTkinter + JSON).
 
 Sign in with Google, then add, search, edit, and delete contacts with the
 same case-insensitive duplicate detection, bulk CSV import, export, and

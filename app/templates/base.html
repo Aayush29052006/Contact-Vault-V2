@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}ContactVault{% endblock %}</title>
+    <title>{% block title %}Contact Vault{% endblock %}</title>
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('contacts.index') if current_user.is_authenticated else url_for('auth.login') }}">ContactVault</a>
+        <a href="{{ url_for('contacts.index') if current_user.is_authenticated else url_for('auth.login') }}">Contact Vault</a>
         {% if current_user.is_authenticated %}
             &nbsp;|&nbsp;{{ current_user.name }}&nbsp;|&nbsp;
             <a href="{{ url_for('auth.logout') }}">Logout</a>
