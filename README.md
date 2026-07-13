@@ -51,7 +51,7 @@ committed to a public repo):
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
 2. Create an OAuth 2.0 Client ID (Web application)
-3. Add `http://localhost:5000/auth/google/callback` as an authorized redirect URI
+3. Add `http://localhost:5000/auth/login/google/callback` as an authorized redirect URI
 4. Copy the client ID and secret into your `.env` file
 
 ## Running tests
