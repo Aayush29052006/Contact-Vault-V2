@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Activity Log - Contact Vault{% endblock %}
+{% block content %}
+    <h1>Activity Log</h1>
+    <p><a href="{{ url_for('contacts.index') }}">Back to contacts</a></p>
+
+    {% if logs %}
+        <table>
+            <thead>
+                <tr><th>When</th><th>What</th></tr>
+            </thead>
+            <tbody>
+            {% for log in logs %}
+                <tr>
+                    <td>{{ log.created_at.strftime('%b %d, %Y %I:%M %p') }} UTC</td>
+                    <td>{{ log.description }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No activity yet.</p>
+    {% endif %}
+{% endblock %}

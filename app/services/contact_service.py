@@ -1,6 +1,7 @@
 from sqlalchemy import func, or_
 
 from app.extensions import db
+from app.models.activity_log import ActivityLog
 from app.models.contact import Contact
 
 
@@ -53,12 +54,16 @@ class ContactService:
             raise ContactNotFoundError(f"No contact with id {contact_id} for this user.")
         return contact
 
+    def list_activity(self):
+        return self.user.activity_logs.all()
+
     def add_contact(self, name, email):
         if self._is_duplicate(email):
             raise DuplicateContactError(f"A contact with email '{email}' already exists.")
 
         contact = Contact(owner=self.user, name=name.strip(), email=email.strip())
         db.session.add(contact)
+        self._log(f"Added contact: {contact.name}")
         db.session.commit()
         return {"action": "add", "contact_id": contact.id}
 
@@ -70,6 +75,7 @@ class ContactService:
         previous = {"name": contact.name, "email": contact.email}
         contact.name = name.strip()
         contact.email = email.strip()
+        self._log(f"Edited contact: {previous['name']} -> {contact.name}")
         db.session.commit()
         return {"action": "edit", "contact_id": contact.id, "previous": previous}
 
@@ -77,6 +83,7 @@ class ContactService:
         contact = self.get_contact(contact_id)
         snapshot = {"name": contact.name, "email": contact.email}
         db.session.delete(contact)
+        self._log(f"Deleted contact: {snapshot['name']}")
         db.session.commit()
         return {"action": "delete", "contact_snapshot": snapshot}
 
@@ -97,6 +104,7 @@ class ContactService:
             existing_emails.add(email_lower)
             added.append({"name": name, "email": email})
 
+        self._log(f"Bulk import: added {len(added)}, skipped {len(skipped)} duplicate(s)")
         db.session.commit()
         return {"added": added, "skipped": skipped}
 
@@ -109,16 +117,19 @@ class ContactService:
 
         if action == "add":
             contact = self.get_contact(last_action["contact_id"])
+            self._log(f"Undid: added contact {contact.name}")
             db.session.delete(contact)
             db.session.commit()
         elif action == "edit":
             contact = self.get_contact(last_action["contact_id"])
             previous = last_action["previous"]
+            self._log(f"Undid: edit on contact {contact.name}")
             contact.name = previous["name"]
             contact.email = previous["email"]
             db.session.commit()
         elif action == "delete":
             snapshot = last_action["contact_snapshot"]
+            self._log(f"Undid: deletion of contact {snapshot['name']}")
             db.session.add(Contact(owner=self.user, name=snapshot["name"], email=snapshot["email"]))
             db.session.commit()
         else:
@@ -132,3 +143,6 @@ class ContactService:
         if exclude_id is not None:
             query = query.filter(Contact.id != exclude_id)
         return db.session.query(query.exists()).scalar()
+
+    def _log(self, description):
+        db.session.add(ActivityLog(user=self.user, description=description))

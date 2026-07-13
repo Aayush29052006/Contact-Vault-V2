@@ -150,6 +150,60 @@ class TestUndo:
             service.undo({"action": "not_a_real_action"})
 
 
+class TestActivityLog:
+    def test_add_contact_writes_activity_log(self, service):
+        service.add_contact("Rohan Sharma", "rohan@example.com")
+        logs = service.list_activity()
+        assert len(logs) == 1
+        assert "Added contact: Rohan Sharma" in logs[0].description
+
+    def test_edit_contact_writes_activity_log(self, service):
+        added = service.add_contact("Rohan Sharma", "rohan@example.com")
+        service.update_contact(added["contact_id"], "Rohan S.", "rohan.s@example.com")
+
+        logs = service.list_activity()
+        assert any("Edited contact" in log.description for log in logs)
+
+    def test_delete_contact_writes_activity_log(self, service):
+        added = service.add_contact("Rohan Sharma", "rohan@example.com")
+        service.delete_contact(added["contact_id"])
+
+        logs = service.list_activity()
+        assert any("Deleted contact" in log.description for log in logs)
+
+    def test_bulk_import_writes_one_summary_log(self, service):
+        service.bulk_import([("A", "a@example.com"), ("B", "b@example.com")])
+
+        logs = service.list_activity()
+        assert any("Bulk import" in log.description for log in logs)
+
+    def test_undo_writes_activity_log(self, service):
+        added = service.add_contact("Rohan Sharma", "rohan@example.com")
+        service.undo(added)
+
+        logs = service.list_activity()
+        assert any("Undid" in log.description for log in logs)
+
+    def test_activity_log_ordered_newest_first(self, service):
+        service.add_contact("First", "first@example.com")
+        service.add_contact("Second", "second@example.com")
+
+        logs = service.list_activity()
+        assert "Second" in logs[0].description
+        assert "First" in logs[1].description
+
+    def test_activity_log_isolated_between_users(self, service, other_user):
+        service.add_contact("Rohan Sharma", "rohan@example.com")
+
+        other_service = ContactService(other_user)
+        assert other_service.list_activity() == []
+
+    def test_activity_log_repr(self, service):
+        service.add_contact("Rohan Sharma", "rohan@example.com")
+        log = service.list_activity()[0]
+        assert "Added contact: Rohan Sharma" in repr(log)
+
+
 class TestMultiUserIsolation:
     def test_user_cannot_access_another_users_contact(self, service, other_user):
         added = service.add_contact("Rohan Sharma", "rohan@example.com")

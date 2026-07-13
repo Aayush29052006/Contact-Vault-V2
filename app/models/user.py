@@ -24,6 +24,13 @@ class User(UserMixin, db.Model):
     contacts = db.relationship(
         "Contact", back_populates="owner", cascade="all, delete-orphan", lazy="dynamic"
     )
+    activity_logs = db.relationship(
+        "ActivityLog",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+        order_by="ActivityLog.created_at.desc()",
+    )
 
     def __repr__(self):
         return f"<User {self.email}>"

@@ -100,6 +100,13 @@ def bulk_import():
     return render_template("contacts/import.html", form=form)
 
 
+@contacts_bp.route("/activity")
+@login_required
+def activity():
+    logs = _service().list_activity()
+    return render_template("contacts/activity.html", logs=logs)
+
+
 @contacts_bp.route("/export/<fmt>")
 @login_required
 def export(fmt):

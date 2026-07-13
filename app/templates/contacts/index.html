@@ -13,7 +13,8 @@
         <a href="{{ url_for('contacts.add') }}">Add contact</a> |
         <a href="{{ url_for('contacts.bulk_import') }}">Bulk import</a> |
         <a href="{{ url_for('contacts.export', fmt='csv') }}">Export CSV</a> |
-        <a href="{{ url_for('contacts.export', fmt='json') }}">Export JSON</a>
+        <a href="{{ url_for('contacts.export', fmt='json') }}">Export JSON</a> |
+        <a href="{{ url_for('contacts.activity') }}">Activity log</a>
     </p>
 
     <form method="post" action="{{ url_for('contacts.undo') }}">

@@ -155,6 +155,26 @@ class TestBulkImportRoute:
         assert b"Priya" in index.data
 
 
+class TestActivityRoute:
+    def test_activity_page_requires_login(self, client):
+        response = client.get("/activity")
+        assert response.status_code == 302
+        assert "/auth/login" in response.location
+
+    def test_activity_page_shows_logged_actions(self, logged_in_client):
+        client, _ = logged_in_client
+        client.post("/add", data={"name": "Rohan Sharma", "email": "rohan@example.com"})
+
+        response = client.get("/activity")
+        assert response.status_code == 200
+        assert b"Added contact: Rohan Sharma" in response.data
+
+    def test_activity_page_empty_state(self, logged_in_client):
+        client, _ = logged_in_client
+        response = client.get("/activity")
+        assert b"No activity yet" in response.data
+
+
 class TestExportRoute:
     def test_export_csv(self, logged_in_client):
         client, _ = logged_in_client
