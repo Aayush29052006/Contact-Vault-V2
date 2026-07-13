@@ -54,6 +54,50 @@ routes (Flask blueprints, HTTP concerns only)
       -> SQLite (Postgres-ready, same code either way)
 ```
 
+## Screenshots
+
+**Login**
+
+| Dark | Light |
+|---|---|
+| ![Login - dark](screenshots/login-dark.png) | ![Login - light](screenshots/login-light.png) |
+
+**Dashboard**
+
+| Dark | Light |
+|---|---|
+| ![Dashboard - dark](screenshots/dashboard-dark.png) | ![Dashboard - light](screenshots/dashboard-light.png) |
+
+**Bulk select and delete**
+
+| Dark | Light |
+|---|---|
+| ![Bulk select - dark](screenshots/bulk-select-dark.png) | ![Bulk select - light](screenshots/bulk-select-light.png) |
+
+**Empty state**
+
+| Dark | Light |
+|---|---|
+| ![Empty state - dark](screenshots/empty-state-dark.png) | ![Empty state - light](screenshots/empty-state-light.png) |
+
+**Add contact** — name is optional, derived from the email if left blank
+
+| Dark | Light |
+|---|---|
+| ![Add contact - dark](screenshots/add-contact-dark.png) | ![Add contact - light](screenshots/add-contact-light.png) |
+
+**Bulk import**
+
+| Dark | Light |
+|---|---|
+| ![Bulk import - dark](screenshots/bulk-import-dark.png) | ![Bulk import - light](screenshots/bulk-import-light.png) |
+
+**Activity Log** — every action logged, with per-entry undo
+
+| Dark | Light |
+|---|---|
+| ![Activity Log - dark](screenshots/activity-log-dark.png) | ![Activity Log - light](screenshots/activity-log-light.png) |
+
 ## Getting started
 
 ```bash
