@@ -65,6 +65,17 @@ class TestContactModel:
         assert contact.user_id == user.id
         assert contact.owner is user
 
+    def test_repr(self, session):
+        user = make_user()
+        session.add(user)
+        session.commit()
+
+        contact = make_contact(owner=user)
+        session.add(contact)
+        session.commit()
+
+        assert repr(contact) == "<Contact Rohan Sharma <rohan@example.com>>"
+
     def test_user_contacts_relationship(self, session):
         user = make_user()
         session.add(user)

@@ -57,7 +57,7 @@ committed to a public repo):
 ## Running tests
 
 ```bash
-pytest
+pytest --cov=app --cov-report=term-missing
 ```
 
 ## License

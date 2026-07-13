@@ -5,6 +5,23 @@ from flask import redirect
 from app.models.user import User
 
 
+class TestUserLoader:
+    def test_load_user_returns_correct_user(self, session):
+        from app.auth.routes import load_user
+
+        user = User(google_id="google-load", email="load@example.com", name="Load Test")
+        session.add(user)
+        session.commit()
+
+        loaded = load_user(str(user.id))
+        assert loaded.id == user.id
+
+    def test_load_user_returns_none_for_unknown_id(self, session):
+        from app.auth.routes import load_user
+
+        assert load_user("999999") is None
+
+
 class TestAuthRoutes:
     def test_login_page_loads(self, client):
         response = client.get("/auth/login")

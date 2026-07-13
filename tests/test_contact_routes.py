@@ -63,6 +63,20 @@ class TestEditRoute:
         response = client.get(f"/edit/{contact.id}")
         assert response.status_code == 404
 
+    def test_edit_to_duplicate_email_shows_error_not_redirect(self, logged_in_client):
+        client, _ = logged_in_client
+        client.post("/add", data={"name": "Contact A", "email": "a@example.com"})
+        client.post("/add", data={"name": "Contact B", "email": "b@example.com"})
+
+        from app.models.contact import Contact
+        contact_b = Contact.query.filter_by(email="b@example.com").first()
+
+        response = client.post(
+            f"/edit/{contact_b.id}", data={"name": "Contact B", "email": "A@Example.com"}
+        )
+        assert response.status_code == 200  # re-renders the form, doesn't redirect
+        assert b"already exists" in response.data
+
 
 class TestDeleteRoute:
     def test_delete_contact(self, logged_in_client, session):
@@ -77,6 +91,22 @@ class TestDeleteRoute:
 
         index = client.get("/")
         assert b"No contacts" in index.data
+
+    def test_delete_another_users_contact_returns_404(self, logged_in_client, session):
+        client, user = logged_in_client
+        client.post("/add", data={"name": "Rohan Sharma", "email": "rohan@example.com"})
+
+        from app.models.contact import Contact
+        contact = Contact.query.filter_by(user_id=user.id).first()
+
+        login_via_google(client, google_id="google-2", email="other@example.com", name="Other")
+        response = client.post(f"/delete/{contact.id}")
+        assert response.status_code == 404
+
+    def test_delete_nonexistent_contact_returns_404(self, logged_in_client):
+        client, _ = logged_in_client
+        response = client.post("/delete/999999")
+        assert response.status_code == 404
 
 
 class TestUndoRoute:
@@ -95,10 +125,28 @@ class TestUndoRoute:
 
 
 class TestBulkImportRoute:
+    def test_import_page_loads(self, logged_in_client):
+        client, _ = logged_in_client
+        response = client.get("/import")
+        assert response.status_code == 200
+        assert b"Bulk Import" in response.data
+
     def test_bulk_import_adds_contacts(self, logged_in_client):
         client, _ = logged_in_client
         response = client.post(
             "/import", data={"data": "Rohan,rohan@example.com\nPriya,priya@example.com"}
+        )
+        assert response.status_code == 302
+
+        index = client.get("/")
+        assert b"Rohan" in index.data
+        assert b"Priya" in index.data
+
+    def test_bulk_import_skips_blank_lines(self, logged_in_client):
+        client, _ = logged_in_client
+        response = client.post(
+            "/import",
+            data={"data": "Rohan,rohan@example.com\n\n\nPriya,priya@example.com\n"},
         )
         assert response.status_code == 302
 
