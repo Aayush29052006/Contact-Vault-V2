@@ -1,7 +1,7 @@
 # Contact Vault v2.0 (Web)
 
 A multi-user contact manager built with Flask — the web counterpart to
-[Contact Vault v1.0.0](https://github.com/) (desktop, CustomTkinter + JSON).
+[Contact Vault v1.0.0](https://github.com/Aayush29052006/Contact-Vault) (desktop, CustomTkinter + JSON).
 
 Sign in with Google, then add, search, edit, and delete contacts — same
 case-insensitive duplicate detection and undo behavior as the desktop
@@ -101,8 +101,8 @@ routes (Flask blueprints, HTTP concerns only)
 ## Getting started
 
 ```bash
-git clone <this-repo-url>
-cd contactvault-v2
+git clone https://github.com/Aayush29052006/Contact-Vault-V2.git
+cd Contact-Vault-V2
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -119,9 +119,9 @@ Then open `http://localhost:5000`.
 
 ### Setting up your own Google OAuth credentials
 
-Since this repo is public, Google login requires each person running it
-locally to use their own free credentials (client secrets can't be
-committed to a public repo):
+Client secrets should never be committed to a repo, public or private -
+so Google login requires each person running this locally to use their
+own free credentials:
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
 2. Create an OAuth 2.0 Client ID (Web application)
