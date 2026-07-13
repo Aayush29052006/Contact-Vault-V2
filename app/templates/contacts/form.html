@@ -1,20 +1,26 @@
 {% extends "base.html" %}
 {% block title %}{{ title }} - Contact Vault{% endblock %}
 {% block content %}
-    <h1>{{ title }}</h1>
-    <form method="post">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.name.label }}<br>
-            {{ form.name() }}
-            {% for error in form.name.errors %}<br><span class="error">{{ error }}</span>{% endfor %}
-        </p>
-        <p>
-            {{ form.email.label }}<br>
-            {{ form.email() }}
-            {% for error in form.email.errors %}<br><span class="error">{{ error }}</span>{% endfor %}
-        </p>
-        {{ form.submit() }}
-    </form>
-    <a href="{{ url_for('contacts.index') }}">Cancel</a>
+    <h1 class="page-heading">{{ title }}</h1>
+    <div class="form-card card">
+        <form method="post">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.name.label(class="form-label") }}
+                {{ form.name(class="form-input", placeholder="Full name (optional - we'll use the email if left blank)") }}
+                {% for error in form.name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.email.label(class="form-label") }}
+                {{ form.email(class="form-input", placeholder="name@example.com") }}
+                {% for error in form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fa-solid fa-check" aria-hidden="true"></i> {{ form.submit.label.text }}
+                </button>
+                <a class="btn-cancel" href="{{ url_for('contacts.index') }}">Cancel</a>
+            </div>
+        </form>
+    </div>
 {% endblock %}

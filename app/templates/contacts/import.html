@@ -1,14 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Bulk Import - Contact Vault{% endblock %}
 {% block content %}
-    <h1>Bulk Import</h1>
-    <p>Paste one contact per line, formatted as: <code>Name,Email</code></p>
+    <h1 class="page-heading">Bulk Import</h1>
+    <p class="import-instructions">
+        Paste one contact per line as <code>Name, Email</code>. Rows that don't match this format will be skipped.
+    </p>
     <form method="post">
         {{ form.hidden_tag() }}
-        {{ form.data(rows=10, cols=50) }}
-        {% for error in form.data.errors %}<br><span class="error">{{ error }}</span>{% endfor %}
-        <br><br>
-        {{ form.submit() }}
+        {{ form.data(class="form-textarea", placeholder="Rohan Sharma, rohan@example.com\nPriya Patel, priya@example.com") }}
+        {% for error in form.data.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">
+                <i class="fa-solid fa-file-import" aria-hidden="true"></i> {{ form.submit.label.text }}
+            </button>
+            <a class="btn-cancel" href="{{ url_for('contacts.index') }}">Cancel</a>
+        </div>
     </form>
-    <a href="{{ url_for('contacts.index') }}">Cancel</a>
 {% endblock %}

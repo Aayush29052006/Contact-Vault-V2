@@ -2,30 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Contact Vault{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <nav>
-        <a href="{{ url_for('contacts.index') if current_user.is_authenticated else url_for('auth.login') }}">Contact Vault</a>
-        {% if current_user.is_authenticated %}
-            &nbsp;|&nbsp;{{ current_user.name }}&nbsp;|&nbsp;
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
-        {% endif %}
-    </nav>
-    <hr>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class="flashes">
-            {% for category, message in messages %}
-                <li class="{{ category }}">{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+    <div class="app-shell">
+        <nav class="top-nav">
+            <a class="nav-brand" href="{{ url_for('contacts.index') }}">
+                <span class="cv-badge" aria-hidden="true">CV</span>
+                <span class="nav-brand-text">Contact Vault</span>
+            </a>
+            <div class="nav-links">
+                <a href="{{ url_for('contacts.activity') }}">Activity log</a>
+                <span class="nav-sep" aria-hidden="true"></span>
+                <span class="nav-user-name text-muted">{{ current_user.name }}</span>
+                <a class="nav-logout" href="{{ url_for('auth.logout') }}">Logout</a>
+            </div>
+        </nav>
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-area" role="status" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">
+                            <i class="fa-solid {{ 'fa-circle-check' if category == 'success' else 'fa-circle-info' }}" aria-hidden="true"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
 </body>
 </html>

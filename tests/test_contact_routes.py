@@ -31,8 +31,16 @@ class TestAddRoute:
         response = client.post(
             "/add", data={"name": "Different Name", "email": "Rohan@Example.com"}
         )
-        assert response.status_code == 200  # re-renders the form, doesn't redirect
+        assert response.status_code == 200
         assert b"already exists" in response.data
+
+    def test_add_with_blank_name_derives_from_email(self, logged_in_client):
+        client, _ = logged_in_client
+        response = client.post("/add", data={"name": "", "email": "jane.doe@example.com"})
+        assert response.status_code == 302
+
+        index = client.get("/")
+        assert b"Jane Doe" in index.data
 
 
 class TestEditRoute:
@@ -154,6 +162,14 @@ class TestBulkImportRoute:
         assert b"Rohan" in index.data
         assert b"Priya" in index.data
 
+    def test_bulk_import_email_only_line_derives_name(self, logged_in_client):
+        client, _ = logged_in_client
+        response = client.post("/import", data={"data": "jane.doe@example.com"})
+        assert response.status_code == 302
+
+        index = client.get("/")
+        assert b"Jane Doe" in index.data
+
 
 class TestActivityRoute:
     def test_activity_page_requires_login(self, client):
@@ -173,6 +189,113 @@ class TestActivityRoute:
         client, _ = logged_in_client
         response = client.get("/activity")
         assert b"No activity yet" in response.data
+
+
+class TestUndoActivityRoute:
+    def test_undo_specific_old_entry_not_just_the_last_one(self, logged_in_client):
+        client, _ = logged_in_client
+        client.post("/add", data={"name": "First", "email": "first@example.com"})
+        client.post("/add", data={"name": "Second", "email": "second@example.com"})
+        client.get("/")  # a real browser follows each redirect immediately, clearing flash messages as it goes
+
+        from app.models.activity_log import ActivityLog
+        first_log = (
+            ActivityLog.query.filter(ActivityLog.description.contains("First")).first()
+        )
+
+        response = client.post(f"/activity/{first_log.id}/undo")
+        assert response.status_code == 302
+
+        index = client.get("/")
+        assert b">First<" not in index.data
+        assert b"Second" in index.data  # untouched - only the targeted entry was undone
+
+    def test_undo_route_requires_login(self, client):
+        response = client.post("/activity/1/undo")
+        assert response.status_code == 302
+        assert "/auth/login" in response.location
+
+    def test_undo_nonexistent_log_entry_404s(self, logged_in_client):
+        client, _ = logged_in_client
+        response = client.post("/activity/999999/undo")
+        assert response.status_code == 404
+
+    def test_undo_entry_with_no_undo_data_404s(self, logged_in_client):
+        """An 'Undid: ...' entry has no undo_data - trying to undo one
+        directly (e.g. a crafted request) should 404, not error out."""
+        client, _ = logged_in_client
+        client.post("/add", data={"name": "Rohan Sharma", "email": "rohan@example.com"})
+        client.post("/undo")
+
+        from app.models.activity_log import ActivityLog
+        undid_log = ActivityLog.query.filter(ActivityLog.description.contains("Undid")).first()
+
+        response = client.post(f"/activity/{undid_log.id}/undo")
+        assert response.status_code == 404
+
+    def test_cannot_undo_another_users_log_entry(self, logged_in_client, session):
+        client, user = logged_in_client
+        client.post("/add", data={"name": "Rohan Sharma", "email": "rohan@example.com"})
+
+        from app.models.activity_log import ActivityLog
+        my_log = ActivityLog.query.filter_by(user_id=user.id).first()
+
+        login_via_google(client, google_id="google-2", email="other@example.com", name="Other")
+        response = client.post(f"/activity/{my_log.id}/undo")
+        assert response.status_code == 404
+
+
+class TestDeleteBulkRoute:
+    def test_delete_bulk_removes_selected_contacts(self, logged_in_client, session):
+        client, user = logged_in_client
+        client.post("/add", data={"name": "A", "email": "a@example.com"})
+        client.post("/add", data={"name": "B", "email": "b@example.com"})
+        client.post("/add", data={"name": "C", "email": "c@example.com"})
+
+        from app.models.contact import Contact
+        contacts = Contact.query.filter_by(user_id=user.id).all()
+        ids_to_delete = [c.id for c in contacts if c.name in ("A", "B")]
+
+        response = client.post("/delete-bulk", data={"contact_ids": ids_to_delete})
+        assert response.status_code == 302
+
+        index = client.get("/")
+        assert b">A<" not in index.data
+        assert b"C" in index.data
+
+    def test_delete_bulk_with_no_selection_flashes_message(self, logged_in_client):
+        client, _ = logged_in_client
+        response = client.post("/delete-bulk", data={})
+        assert response.status_code == 302
+
+        index = client.get("/")
+        assert b"No contacts selected" in index.data
+
+    def test_delete_bulk_with_another_users_id_returns_404(self, logged_in_client, session):
+        client, user = logged_in_client
+        client.post("/add", data={"name": "Mine", "email": "mine@example.com"})
+
+        from app.models.contact import Contact
+        mine = Contact.query.filter_by(user_id=user.id).first()
+
+        login_via_google(client, google_id="google-2", email="other@example.com", name="Other")
+        response = client.post("/delete-bulk", data={"contact_ids": [mine.id]})
+        assert response.status_code == 404
+
+    def test_undo_after_bulk_delete_restores_contacts(self, logged_in_client, session):
+        client, user = logged_in_client
+        client.post("/add", data={"name": "A", "email": "a@example.com"})
+        client.post("/add", data={"name": "B", "email": "b@example.com"})
+
+        from app.models.contact import Contact
+        ids = [c.id for c in Contact.query.filter_by(user_id=user.id).all()]
+
+        client.post("/delete-bulk", data={"contact_ids": ids})
+        client.post("/undo")
+
+        index = client.get("/")
+        assert b"A" in index.data
+        assert b"B" in index.data
 
 
 class TestExportRoute:

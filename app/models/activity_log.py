@@ -13,6 +13,7 @@ class ActivityLog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    undo_data = db.Column(db.Text, nullable=True)
 
     user = db.relationship("User", back_populates="activity_logs")
 

@@ -41,4 +41,7 @@ def create_app(config_class=Config):
     from app.contacts.routes import contacts_bp
     app.register_blueprint(contacts_bp)
 
+    from app.utils import time_ago
+    app.jinja_env.filters["timeago"] = time_ago
+
     return app

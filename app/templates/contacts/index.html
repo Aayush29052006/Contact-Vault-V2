@@ -1,49 +1,92 @@
 {% extends "base.html" %}
 {% block title %}Contacts - Contact Vault{% endblock %}
 {% block content %}
-    <h1>Your Contacts</h1>
+    <h1 class="page-heading">Your Contacts</h1>
 
-    <form method="get" action="{{ url_for('contacts.index') }}">
-        <input type="text" name="q" value="{{ query }}" placeholder="Search by name or email">
-        <button type="submit">Search</button>
-        {% if query %}<a href="{{ url_for('contacts.index') }}">Clear</a>{% endif %}
+    <form class="search-bar" method="get" action="{{ url_for('contacts.index') }}">
+        <input type="text" name="q" class="form-input" value="{{ query }}" placeholder="Search by name or email..." aria-label="Search contacts">
+        <button class="btn btn-primary" type="submit">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Search
+        </button>
     </form>
+    {% if query %}<p style="margin-top:-16px; margin-bottom:20px;"><a href="{{ url_for('contacts.index') }}">Clear search</a></p>{% endif %}
 
-    <p>
-        <a href="{{ url_for('contacts.add') }}">Add contact</a> |
-        <a href="{{ url_for('contacts.bulk_import') }}">Bulk import</a> |
-        <a href="{{ url_for('contacts.export', fmt='csv') }}">Export CSV</a> |
-        <a href="{{ url_for('contacts.export', fmt='json') }}">Export JSON</a> |
-        <a href="{{ url_for('contacts.activity') }}">Activity log</a>
-    </p>
-
-    <form method="post" action="{{ url_for('contacts.undo') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit">Undo last action</button>
-    </form>
+    <div class="action-row">
+        <a class="btn btn-primary" href="{{ url_for('contacts.add') }}">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> Add contact
+        </a>
+        <a class="btn" href="{{ url_for('contacts.bulk_import') }}">
+            <i class="fa-solid fa-file-import" aria-hidden="true"></i> Bulk import
+        </a>
+        <a class="btn" href="{{ url_for('contacts.export', fmt='csv') }}">
+            <i class="fa-solid fa-file-csv" aria-hidden="true"></i> Export CSV
+        </a>
+        <a class="btn" href="{{ url_for('contacts.export', fmt='json') }}">
+            <i class="fa-solid fa-file-code" aria-hidden="true"></i> Export JSON
+        </a>
+        <form method="post" action="{{ url_for('contacts.undo') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-undo btn-sm" type="submit" title="Undo last action">
+                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Undo last action
+            </button>
+        </form>
+    </div>
 
     {% if contacts %}
-        <table>
+        <form id="bulk-delete-form" method="post" action="{{ url_for('contacts.delete_bulk') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        </form>
+        <table class="data-table" role="table">
             <thead>
-                <tr><th>Name</th><th>Email</th><th>Actions</th></tr>
+                <tr>
+                    <th scope="col" style="width:32px">
+                        <input type="checkbox" aria-label="Select all contacts"
+                               onchange="document.querySelectorAll('input[name=contact_ids]').forEach(function(cb){cb.checked=this.checked}, this)">
+                    </th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col" style="text-align:right">Actions</th>
+                </tr>
             </thead>
             <tbody>
             {% for contact in contacts %}
                 <tr>
-                    <td>{{ contact.name }}</td>
-                    <td>{{ contact.email }}</td>
                     <td>
-                        <a href="{{ url_for('contacts.edit', contact_id=contact.id) }}">Edit</a>
-                        <form method="post" action="{{ url_for('contacts.delete', contact_id=contact.id) }}" style="display:inline">
+                        <input type="checkbox" name="contact_ids" value="{{ contact.id }}"
+                               form="bulk-delete-form" aria-label="Select {{ contact.name }}">
+                    </td>
+                    <td class="col-name">{{ contact.name }}</td>
+                    <td class="col-email">{{ contact.email }}</td>
+                    <td class="col-actions">
+                        <a class="btn-text" href="{{ url_for('contacts.edit', contact_id=contact.id) }}">Edit</a>
+                        <form method="post" action="{{ url_for('contacts.delete', contact_id=contact.id) }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" onclick="return confirm('Delete this contact?')">Delete</button>
+                            <button class="btn-text btn-text-danger" type="submit" onclick="return confirm('Delete this contact?')">Delete</button>
                         </form>
                     </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+        <div style="margin-top:16px">
+            <button class="btn btn-danger-outline btn-sm" type="submit" form="bulk-delete-form"
+                    onclick="return confirm('Delete all selected contacts? This cannot be undone individually - only as one batch.')">
+                <i class="fa-solid fa-trash" aria-hidden="true"></i> Delete selected
+            </button>
+        </div>
     {% else %}
-        <p>No contacts {% if query %}matching &quot;{{ query }}&quot; {% endif %}yet.</p>
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-address-book" aria-hidden="true"></i></div>
+            <h2 class="empty-heading">No contacts {% if query %}match &quot;{{ query }}&quot;{% else %}yet{% endif %}</h2>
+            <p class="empty-desc">
+                {% if query %}Try a different search, or clear it to see everyone.
+                {% else %}Add your first contact to start building your vault.{% endif %}
+            </p>
+            {% if not query %}
+            <a class="btn btn-primary" href="{{ url_for('contacts.add') }}">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i> Add contact
+            </a>
+            {% endif %}
+        </div>
     {% endif %}
 {% endblock %}

@@ -1,24 +1,45 @@
 {% extends "base.html" %}
 {% block title %}Activity Log - Contact Vault{% endblock %}
 {% block content %}
-    <h1>Activity Log</h1>
-    <p><a href="{{ url_for('contacts.index') }}">Back to contacts</a></p>
+    <h1 class="page-heading">Activity Log</h1>
+    <p style="margin-top:-16px; margin-bottom:24px;"><a href="{{ url_for('contacts.index') }}">Back to contacts</a></p>
 
     {% if logs %}
-        <table>
+        <table class="data-table log-table" role="table">
             <thead>
-                <tr><th>When</th><th>What</th></tr>
+                <tr>
+                    <th scope="col" class="col-when">When</th>
+                    <th scope="col" class="col-what">What</th>
+                </tr>
             </thead>
             <tbody>
             {% for log in logs %}
                 <tr>
-                    <td>{{ log.created_at.strftime('%b %d, %Y %I:%M %p') }} UTC</td>
-                    <td>{{ log.description }}</td>
+                    <td class="col-when">
+                        <div class="log-date">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</div>
+                        <div class="log-relative">{{ log.created_at | timeago }}</div>
+                    </td>
+                    <td class="col-what">
+                        {{ log.description }}
+                        {% if log.undo_data %}
+                        <form method="post" action="{{ url_for('contacts.undo_activity', log_id=log.id) }}" style="display:inline; margin-left:10px;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn-text" type="submit"
+                                    onclick="return confirm('Undo this action? If things have changed since, the result may not exactly match what you expect.')">
+                                Undo
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     {% else %}
-        <p>No activity yet.</p>
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i></div>
+            <h2 class="empty-heading">No activity yet</h2>
+            <p class="empty-desc">Actions you take will show up here.</p>
+        </div>
     {% endif %}
 {% endblock %}
