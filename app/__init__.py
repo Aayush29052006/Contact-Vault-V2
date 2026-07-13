@@ -2,7 +2,7 @@ from flask import Flask
 from dotenv import load_dotenv
 
 from app.config import Config
-from app.extensions import db, migrate, login_manager, oauth
+from app.extensions import db, migrate, login_manager, oauth, csrf
 
 load_dotenv()
 
@@ -21,6 +21,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     oauth.init_app(app)
+    csrf.init_app(app)
 
     oauth.register(
         name="google",

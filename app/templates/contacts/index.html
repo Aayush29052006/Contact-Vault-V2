@@ -17,6 +17,7 @@
     </p>
 
     <form method="post" action="{{ url_for('contacts.undo') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit">Undo last action</button>
     </form>
 
@@ -33,6 +34,7 @@
                     <td>
                         <a href="{{ url_for('contacts.edit', contact_id=contact.id) }}">Edit</a>
                         <form method="post" action="{{ url_for('contacts.delete', contact_id=contact.id) }}" style="display:inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" onclick="return confirm('Delete this contact?')">Delete</button>
                         </form>
                     </td>
