@@ -1,10 +1,16 @@
+import os
+
 from flask import Flask
 from dotenv import load_dotenv
 
+# Must run before Config is imported below - Config reads os.environ.get(...)
+# at class-definition time, so .env has to be loaded into the environment
+# first, or every value from .env (DATABASE_URL, etc.) is silently ignored
+# in favor of whatever was already in the environment (or the fallback).
+load_dotenv()
+
 from app.config import Config
 from app.extensions import db, migrate, login_manager, oauth, csrf
-
-load_dotenv()
 
 
 def create_app(config_class=Config):
@@ -16,6 +22,12 @@ def create_app(config_class=Config):
     """
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_class)
+
+    # instance/ is gitignored (it holds the local SQLite file), so a
+    # fresh clone never has this folder on disk. Without this, SQLite
+    # fails with "unable to open database file" - it can create the
+    # .db file itself, but not the parent directory.
+    os.makedirs(app.instance_path, exist_ok=True)
 
     db.init_app(app)
     migrate.init_app(app, db)

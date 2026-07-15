@@ -1,6 +1,13 @@
 import os
+from pathlib import Path
 
 basedir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# .as_posix() forces forward slashes regardless of OS - required because
+# SQLite connection URLs are a URI format, not a native file path. On
+# Windows, os.path.join() gives backslashes, which SQLite's URL parser
+# cannot open ("unable to open database file") even though the path
+# looks correct to a human.
+_default_db_path = (Path(basedir) / "instance" / "contactvault.db").as_posix()
 
 
 class Config:
@@ -9,7 +16,7 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DATABASE_URL",
-        f"sqlite:///{os.path.join(basedir, 'instance', 'contactvault.db')}",
+        f"sqlite:///{_default_db_path}",
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
