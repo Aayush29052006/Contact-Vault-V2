@@ -84,6 +84,5 @@ and a full audit trail.
 - Deliberately runs localhost-only rather than deployed — anyone
   browsing the repo can clone and run it directly, matching v1.0.0's
   "just run it" accessibility.
-- Kept private until after graduation, same as v1.0.0.
 
 [Full commit history](https://github.com/Aayush29052006/Contact-Vault-V2/commits/main)
